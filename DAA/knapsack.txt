@@ -1,0 +1,48 @@
+#include <iostream>
+#include <vector>
+using namespace std;
+
+int knapsack(const std::vector<int>& weights, const std::vector<int>& values, int capacity) {
+    int n = weights.size();
+    std::vector<std::vector<int>> dp(n + 1, std::vector<int>(capacity + 1, 0));
+    
+    // Build dp table in a bottom-up manner
+    for (int i = 0; i <= n; i++) {
+        for (int w = 0; w <= capacity; w++) {
+            if (i == 0 || w == 0)
+                dp[i][w] = 0;
+            else if (weights[i - 1] <= w)
+                dp[i][w] = std::max(values[i - 1] + dp[i - 1][w - weights[i - 1]], dp[i - 1][w]);
+            else
+                dp[i][w] = dp[i - 1][w];
+        }
+    }
+    
+    // Store the result of Knapsack
+    int result = dp[n][capacity];
+    
+    // Find the items that were included in the knapsack
+    std::cout << "Selected items:\n";
+    int w = capacity;
+    for (int i = n; i > 0 && result > 0; i--) {
+        if (result != dp[i - 1][w]) {
+            std::cout << "Item " << i << " (Weight: " << weights[i - 1] << ", Value: " << values[i - 1] << ")\n";
+            result -= values[i - 1];
+            w -= weights[i - 1];
+        }
+    }
+    
+    // Return the maximum value we can get
+    return dp[n][capacity];
+}
+
+int main() {
+    std::vector<int> values = {60, 100, 120};
+    std::vector<int> weights = {10, 20, 30};
+    int capacity = 50;
+    
+    int maxValue = knapsack(weights, values, capacity);
+    std::cout << "Maximum value: " << maxValue << std::endl;
+    
+    return 0;
+}

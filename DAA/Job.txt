@@ -1,0 +1,86 @@
+#include <iostream>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+class Job {
+public:
+    char id;
+    int deadline;
+    int profit;
+
+    Job(char id, int deadline, int profit) : id(id), deadline(deadline), profit(profit) {}
+};
+
+// Function to compare jobs by profit in descending order
+bool compareProfit(Job j1, Job j2) {
+    return j1.profit > j2.profit;
+}
+
+void printJobSequence(vector<Job>& jobs) {
+    // Sort jobs in descending order of profit
+    sort(jobs.begin(), jobs.end(), compareProfit);
+
+    int n = jobs.size();
+    
+    // Find the maximum deadline
+    int maxDeadline = 0;
+    for (const Job& job : jobs) {
+        maxDeadline = max(maxDeadline, job.deadline);
+    }
+
+    // Initialize result array and slot array
+    vector<char> result(maxDeadline, 'X');  // Initialize with 'X' for empty slots
+    vector<bool> slot(maxDeadline, false);  // Track if slot is filled
+
+    // Iterate through all jobs
+    for (int i = 0; i < n; i++) {
+        // Find a free slot for this job (start from the last possible slot)
+        for (int j = min(maxDeadline - 1, jobs[i].deadline - 1); j >= 0; j--) {
+            if (!slot[j]) {
+                result[j] = jobs[i].id;  // Assign job to the slot
+                slot[j] = true;          // Mark slot as occupied
+                break;
+            }
+        }
+    }
+
+    // Print the job sequence
+    cout << "Job Sequence: ";
+    for (char jobId : result) {
+        if (jobId != 'X') {
+            cout << jobId << " ";
+        }
+    }
+    cout << endl;
+
+    // Calculate and print the total profit
+    int totalProfit = 0;
+    for (int i = 0; i < maxDeadline; i++) {
+        if (slot[i]) {
+            for (const Job& job : jobs) {
+                if (job.id == result[i]) {
+                    totalProfit += job.profit;
+                    break;
+                }
+            }
+        }
+    }
+    cout << "Total Profit: " << totalProfit << endl;
+}
+
+int main() {
+    vector<Job> jobs = {
+        Job('a', 2, 100),
+        Job('b', 1, 19),
+        Job('c', 2, 27),
+        Job('d', 1, 25),
+        Job('e', 3, 15)
+    };
+
+    cout << "Job Sequencing with Deadlines:" << endl;
+    printJobSequence(jobs);
+
+    return 0;
+}
